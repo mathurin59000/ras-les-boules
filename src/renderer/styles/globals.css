@@ -1,0 +1,256 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+@import '@fontsource-variable/plus-jakarta-sans';
+@import '@fontsource-variable/jetbrains-mono';
+@import '@fontsource/young-serif';
+
+@custom-variant dark (&:is(.dark *));
+
+/* Brand scales (from the Ras les boules design system) */
+:root {
+  --primary-50: #eeedfd;
+  --primary-100: #dcdafc;
+  --primary-200: #b9b4f9;
+  --primary-300: #968ff5;
+  --primary-400: #6e64f1;
+  --primary-500: #4038eb;
+  --primary-600: #2721e8;
+  --primary-700: #1e19ba;
+  --primary-800: #17138c;
+  --primary-900: #100d5e;
+
+  --secondary-50: #ebf8fb;
+  --secondary-100: #d3eff5;
+  --secondary-300: #7ccdde;
+  --secondary-400: #5cbfd6;
+  --secondary-500: #49b8d3;
+  --secondary-600: #2e97b0;
+  --secondary-700: #24758a;
+
+  --accent-50: #fdece4;
+  --accent-300: #f68f60;
+  --accent-400: #f47c46;
+  --accent-500: #f2662a;
+  --accent-600: #d14f17;
+  --accent-700: #a33e12;
+
+  --neutral-50: #f7f7f8;
+  --neutral-100: #eeeef0;
+  --neutral-150: #e2e2e6;
+  --neutral-200: #cfcfd5;
+  --neutral-300: #ababb4;
+  --neutral-400: #85858f;
+  --neutral-500: #64646e;
+  --neutral-600: #4a4a53;
+  --neutral-800: #221f24;
+  --neutral-900: #161316;
+  --neutral-950: #0d0b0d;
+
+  /* Status tones */
+  --success-50: #e8f7ee;
+  --success-500: #22a05b;
+  --success-700: #106438;
+  --pending-50: #eef1f8;
+  --pending-500: #7a8fc4;
+  --pending-700: #45568a;
+  --live-50: #fef0e8;
+  --live-500: var(--accent-500);
+  --live-700: var(--accent-700);
+  --neutral-tone-50: var(--neutral-100);
+  --neutral-tone-500: var(--neutral-500);
+  --neutral-tone-700: var(--neutral-600);
+
+  /* shadcn semantic tokens */
+  --radius: 0.625rem;
+  --background: var(--neutral-50);
+  --foreground: var(--neutral-900);
+  --card: #ffffff;
+  --card-foreground: var(--neutral-900);
+  --popover: #ffffff;
+  --popover-foreground: var(--neutral-900);
+  --primary: var(--primary-600);
+  --primary-foreground: #ffffff;
+  --secondary: var(--neutral-100);
+  --secondary-foreground: var(--neutral-800);
+  --muted: var(--neutral-100);
+  --muted-foreground: var(--neutral-500);
+  --accent: color-mix(in srgb, var(--primary-500) 10%, var(--card));
+  --accent-foreground: var(--primary-700);
+  --destructive: #dc3838;
+  --border: var(--neutral-150);
+  --input: var(--neutral-200);
+  --ring: var(--primary-300);
+  --sidebar: #ffffff;
+  --sidebar-foreground: var(--neutral-900);
+  --sidebar-primary: var(--primary-600);
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: rgb(255 255 255 / 0.08);
+  --sidebar-accent-foreground: var(--primary-700);
+  --sidebar-border: var(--neutral-150);
+  --sidebar-ring: var(--primary-300);
+  --shadow-color: 222deg 30% 20%;
+}
+
+.dark {
+  --success-500: #34c77e;
+  --pending-500: #92a4e0;
+  --background: var(--neutral-950);
+  --foreground: #f5f5f7;
+  --card: var(--neutral-900);
+  --card-foreground: #f5f5f7;
+  --popover: var(--neutral-800);
+  --popover-foreground: #f5f5f7;
+  --primary: var(--primary-400);
+  --primary-foreground: var(--neutral-950);
+  --secondary: var(--neutral-800);
+  --secondary-foreground: #f5f5f7;
+  --muted: var(--neutral-800);
+  --muted-foreground: var(--neutral-300);
+  --accent: color-mix(in srgb, var(--primary-500) 18%, var(--card));
+  --accent-foreground: var(--primary-200);
+  --destructive: #f0585c;
+  --border: #2a272c;
+  --input: #37343a;
+  --ring: var(--primary-700);
+  --sidebar: var(--neutral-900);
+  --sidebar-foreground: #f5f5f7;
+  --sidebar-primary: var(--primary-400);
+  --sidebar-primary-foreground: var(--neutral-950);
+  --sidebar-accent: rgb(255 255 255 / 0.08);
+  --sidebar-accent-foreground: var(--primary-200);
+  --sidebar-border: #2a272c;
+  --sidebar-ring: var(--primary-700);
+  --shadow-color: 0deg 0% 0%;
+  --neutral-tone-50: #2a272c;
+  --neutral-tone-500: var(--neutral-300);
+  --neutral-tone-700: var(--neutral-200);
+  --success-50: #12301f;
+  --success-700: #7cd9a0;
+  --pending-50: #1c2233;
+  --pending-700: #afc0e0;
+  --live-50: #3a1e10;
+  --live-700: #f9bc98;
+}
+
+@theme inline {
+  --animate-card-in: card-in 900ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  --font-sans: 'Plus Jakarta Sans Variable', 'Inter', system-ui, sans-serif;
+  --font-serif: 'Young Serif', Georgia, serif;
+  --font-mono: 'JetBrains Mono Variable', ui-monospace, monospace;
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  /* brand scales as utilities: bg-brand-600, text-accent-500 … */
+  --color-brand-50: var(--primary-50);
+  --color-brand-100: var(--primary-100);
+  --color-brand-200: var(--primary-200);
+  --color-brand-300: var(--primary-300);
+  --color-brand-400: var(--primary-400);
+  --color-brand-500: var(--primary-500);
+  --color-brand-600: var(--primary-600);
+  --color-brand-700: var(--primary-700);
+  --color-turquoise-50: var(--secondary-50);
+  --color-turquoise-500: var(--secondary-500);
+  --color-turquoise-700: var(--secondary-700);
+  --color-orange-50: var(--accent-50);
+  --color-orange-500: var(--accent-500);
+  --color-orange-700: var(--accent-700);
+
+  /* status tones: bg-success-50 text-success-700 … */
+  --color-success-50: var(--success-50);
+  --color-success-500: var(--success-500);
+  --color-success-700: var(--success-700);
+  --color-pending-50: var(--pending-50);
+  --color-pending-500: var(--pending-500);
+  --color-pending-700: var(--pending-700);
+  --color-live-50: var(--live-50);
+  --color-live-500: var(--live-500);
+  --color-live-700: var(--live-700);
+  --color-neutral-tone-50: var(--neutral-tone-50);
+  --color-neutral-tone-500: var(--neutral-tone-500);
+  --color-neutral-tone-700: var(--neutral-tone-700);
+
+  --shadow-sm: 0 2px 6px hsl(var(--shadow-color) / 0.08), 0 1px 2px hsl(var(--shadow-color) / 0.06);
+  --shadow-md: 0 8px 24px hsl(var(--shadow-color) / 0.1), 0 2px 6px hsl(var(--shadow-color) / 0.06);
+  --shadow-lg:
+    0 16px 40px hsl(var(--shadow-color) / 0.14), 0 4px 10px hsl(var(--shadow-color) / 0.08);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+  body {
+    @apply bg-background font-sans text-sm text-foreground antialiased;
+  }
+  ::selection {
+    background: var(--primary-200);
+    color: var(--neutral-900);
+  }
+}
+
+.font-tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+@keyframes badge-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
+  }
+}
+
+@keyframes card-in {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-card-in {
+    animation: none;
+  }
+}

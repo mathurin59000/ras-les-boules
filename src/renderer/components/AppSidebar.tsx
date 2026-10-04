@@ -1,5 +1,15 @@
+import { useEffect, useState } from 'react'
 import { NavLink } from 'react-router'
-import { PanelLeftClose, PanelLeftOpen, Plus, Settings, Trophy } from 'lucide-react'
+import {
+  Download,
+  PanelLeftClose,
+  PanelLeftOpen,
+  Plus,
+  RefreshCw,
+  Settings,
+  Trophy,
+} from 'lucide-react'
+import type { UpdateState } from '@shared/types'
 import logo from '@/assets/logo.jpeg'
 import { cn } from '@/lib/utils'
 import { useUiStore } from '@/stores/ui-store'
@@ -8,6 +18,43 @@ const NAV = [
   { to: '/', label: 'Tournois', icon: Trophy, end: false },
   { to: '/settings', label: 'Paramètres', icon: Settings, end: true },
 ]
+
+function UpdateButton({ collapsed }: { collapsed: boolean }) {
+  const [state, setState] = useState<UpdateState>({ status: 'idle' })
+  useEffect(() => window.rlb.onUpdate(setState), [])
+  if (state.status === 'idle') return null
+
+  const {
+    label,
+    icon: Icon,
+    onClick,
+  } = state.status === 'available'
+    ? {
+        label: `Télécharger la v${state.version}`,
+        icon: Download,
+        onClick: window.rlb.downloadUpdate,
+      }
+    : state.status === 'downloading'
+      ? {
+          label: `Téléchargement ${Math.round(state.percent)} %`,
+          icon: Download,
+          onClick: undefined,
+        }
+      : { label: 'Redémarrer et installer', icon: RefreshCw, onClick: window.rlb.installUpdate }
+
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={!onClick}
+      title={collapsed ? label : undefined}
+      className="flex h-10 items-center justify-center gap-2 rounded-md bg-white/10 text-[13px] font-semibold text-white transition-colors hover:bg-white/20 disabled:opacity-70"
+    >
+      <Icon className="size-4 shrink-0" />
+      {!collapsed && label}
+    </button>
+  )
+}
 
 export function AppSidebar() {
   const collapsed = useUiStore((s) => s.sidebarCollapsed)
@@ -67,6 +114,8 @@ export function AppSidebar() {
         ))}
       </nav>
 
+      <UpdateButton collapsed={collapsed} />
+
       <div
         className={cn(
           'flex items-center justify-between gap-1.5 border-t border-white/10 pt-3',
@@ -74,7 +123,9 @@ export function AppSidebar() {
         )}
       >
         <span className="text-xs whitespace-nowrap text-neutral-400">
-          {collapsed ? '0.1' : 'Version 0.1.0'}
+          {collapsed
+            ? __APP_VERSION__.split('.').slice(0, 2).join('.')
+            : `Version ${__APP_VERSION__}`}
         </span>
         <button
           type="button"

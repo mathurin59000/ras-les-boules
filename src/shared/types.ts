@@ -89,7 +89,16 @@ export type DbSlices = Partial<Omit<DbSnapshot, 'matches' | 'prefs'>> & {
   prefs?: Record<string, string | null | undefined>
 }
 
+export type UpdateState =
+  | { status: 'idle' }
+  | { status: 'available'; version: string }
+  | { status: 'downloading'; percent: number }
+  | { status: 'ready' }
+
 export interface RlbApi {
   load: () => DbSnapshot | null
   save: (slices: DbSlices) => void
+  onUpdate: (cb: (state: UpdateState) => void) => () => void
+  downloadUpdate: () => void
+  installUpdate: () => void
 }

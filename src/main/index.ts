@@ -1,8 +1,9 @@
 import { app, BrowserWindow, ipcMain } from 'electron'
 import { join } from 'node:path'
 import { load, openDb, save } from './db'
+import { initUpdater } from './updater'
 
-function createWindow(): void {
+function createWindow(): BrowserWindow {
   const win = new BrowserWindow({
     width: 1440,
     height: 900,
@@ -17,6 +18,7 @@ function createWindow(): void {
   })
   if (process.env['ELECTRON_RENDERER_URL']) win.loadURL(process.env['ELECTRON_RENDERER_URL'])
   else win.loadFile(join(__dirname, '../renderer/index.html'))
+  return win
 }
 
 app.whenReady().then(() => {
@@ -25,7 +27,7 @@ app.whenReady().then(() => {
     e.returnValue = load()
   })
   ipcMain.on('db:save', (_e, slices) => save(slices))
-  createWindow()
+  initUpdater(createWindow())
 })
 
 app.on('window-all-closed', () => app.quit())

@@ -65,7 +65,10 @@
       "target": [
         "dmg",
         "zip"
-      ]
+      ],
+      "category": "public.app-category.productivity",
+      "hardenedRuntime": true,
+      "notarize": true
     },
     "win": {
       "target": "nsis"

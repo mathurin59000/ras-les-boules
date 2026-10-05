@@ -41,6 +41,29 @@ jobs:
             -noout
 
           echo "Certificate password is valid."
+      - name: Inspect macOS certificate
+        shell: bash
+        env:
+          CERTIFICATE_BASE64: ${{ secrets.MAC_CERTIFICATE }}
+          CERTIFICATE_PASSWORD: ${{ secrets.MAC_CERTIFICATE_PASSWORD }}
+        run: |
+          set -e
+
+          echo "$CERTIFICATE_BASE64" | base64 --decode > "$RUNNER_TEMP/certificate.p12"
+
+          security create-keychain -p "temporary-password" "$RUNNER_TEMP/test.keychain-db"
+
+          security import "$RUNNER_TEMP/certificate.p12" \
+            -P "$CERTIFICATE_PASSWORD" \
+            -A \
+            -t cert \
+            -f pkcs12 \
+            -k "$RUNNER_TEMP/test.keychain-db"
+
+          security find-identity \
+            -v \
+            -p codesigning \
+            "$RUNNER_TEMP/test.keychain-db"
       - run: npx electron-builder --publish always
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

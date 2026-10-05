@@ -34,6 +34,7 @@ jobs:
 
           echo "Checking PKCS#12..."
           openssl pkcs12 \
+            -legacy \
             -in /tmp/certificate.p12 \
             -passin "pass:$CSC_KEY_PASSWORD" \
             -info \

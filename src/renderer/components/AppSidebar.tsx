@@ -69,7 +69,7 @@ export function AppSidebar() {
         collapsed ? 'w-18 px-4' : 'w-58 px-3.5',
       )}
     >
-      <div className={cn('flex items-center gap-2.5 px-2', collapsed && 'justify-center')}>
+      <div className={cn('flex items-center gap-2.5', collapsed ? 'justify-center' : 'px-2')}>
         <img src={logo} alt="Ras les boules" className="size-7 shrink-0 object-cover" />
         {!collapsed && (
           <span className="font-serif text-[19px] leading-none tracking-tight whitespace-nowrap">
@@ -123,9 +123,7 @@ export function AppSidebar() {
         )}
       >
         <span className="text-xs whitespace-nowrap text-neutral-400">
-          {collapsed
-            ? __APP_VERSION__.split('.').slice(0, 2).join('.')
-            : `Version ${__APP_VERSION__}`}
+          {collapsed ? __APP_VERSION__ : `Version ${__APP_VERSION__}`}
         </span>
         <button
           type="button"

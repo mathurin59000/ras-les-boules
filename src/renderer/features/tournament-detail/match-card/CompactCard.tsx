@@ -26,7 +26,7 @@ function Row({ side }: { side: SideView }) {
 export function CompactCard(props: MatchCardProps) {
   const [a, b] = matchSides(props)
   return (
-    <div onClick={props.onAction} className={`${CARD_CLASS} overflow-hidden`}>
+    <div data-testid="match-card" onClick={props.onAction} className={`${CARD_CLASS} overflow-hidden`}>
       <div className="flex flex-col gap-2 px-3.5 py-3">
         <div className="flex items-center justify-between gap-2">
           <StatusPill kind={props.kind} />

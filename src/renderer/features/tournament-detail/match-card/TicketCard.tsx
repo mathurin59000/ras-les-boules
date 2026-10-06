@@ -17,7 +17,7 @@ function Half({ side }: { side: SideView }) {
 export function TicketCard(props: MatchCardProps) {
   const [a, b] = matchSides(props)
   return (
-    <div onClick={props.onAction} className={`${CARD_CLASS} flex flex-col overflow-hidden`}>
+    <div data-testid="match-card" onClick={props.onAction} className={`${CARD_CLASS} flex flex-col overflow-hidden`}>
       <div
         className="flex items-center justify-between px-4 py-2"
         style={{ background: 'color-mix(in srgb, var(--primary-400) 12%, var(--card))' }}

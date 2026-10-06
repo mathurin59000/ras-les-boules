@@ -19,7 +19,7 @@ function Side({ side }: { side: SideView }) {
 export function DuelCard(props: MatchCardProps) {
   const [a, b] = matchSides(props)
   return (
-    <div onClick={props.onAction} className={`${CARD_CLASS} flex flex-col gap-3.5 p-4`}>
+    <div data-testid="match-card" onClick={props.onAction} className={`${CARD_CLASS} flex flex-col gap-3.5 p-4`}>
       <div className="flex items-center justify-between gap-2">
         <StatusPill kind={props.kind} />
         <RoundPill round={props.match.round} />

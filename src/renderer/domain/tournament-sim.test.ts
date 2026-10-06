@@ -70,8 +70,8 @@ function rematches(finished: Match[]) {
 
 describe('whole tournaments, matches finished in any order', () => {
   const cases = [
-    { players: 9, rounds: 5, byes: 5, maxRematches: 4 }, // one exemption per round
-    { players: 7, rounds: 3, byes: 3, maxRematches: 2 },
+    { players: 9, rounds: 5, byes: 5, maxRematches: 2 }, // one exemption per round
+    { players: 7, rounds: 3, byes: 3, maxRematches: 0 },
     { players: 8, rounds: 4, byes: 0, maxRematches: 0 },
     { players: 6, rounds: 5, byes: 0, maxRematches: 6 },
   ]

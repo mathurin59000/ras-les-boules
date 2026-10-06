@@ -35,6 +35,16 @@ export const hasLimit = (limits: PairingLimits) => Object.values(limits).some(Bo
 
 const pairKey = (a: string, b: string) => [a, b].sort().join('|')
 
+/** Pairs of players who met, or are booked to meet, in a real match. */
+function playedPairs(st: PairingState): (a: string, b: string) => boolean {
+  const played = new Set(
+    [...st.pending, ...st.live, ...st.finished]
+      .filter((m) => !isBye(m))
+      .map((m) => pairKey(m.p1.name, m.p2.name)),
+  )
+  return (a, b) => played.has(pairKey(a, b))
+}
+
 /** Matches played or booked per player; an exemption counts as a match. */
 function countMatches(st: PairingState): Map<string, number> {
   const count = new Map<string, number>()
@@ -111,6 +121,7 @@ export function awardByes(st: PairingState, limits: PairingLimits, idPrefix: str
   const states = playerStates(st, limits).filter((p) => !p.capped)
   const free = states.filter((p) => !p.busy)
   const hadBye = new Set(st.finished.filter(isBye).map((m) => m.p1.name))
+  const hasPlayed = playedPairs(st)
   const ranking = computeRanking(st.finished)
   const strength = (p: PlayerState) => {
     const r = ranking.find((x) => x.name === p.name)
@@ -125,11 +136,19 @@ export function awardByes(st: PairingState, limits: PairingLimits, idPrefix: str
     const group = free.filter((p) => p.level === r)
     if (group.length % 2 === 0 || !isFinal(states, group, r) || !hasActivity(r)) continue
     const pool = group.filter((p) => !hadBye.has(p.name))
-    const [lowest] = [...(pool.length ? pool : group)].sort((a, b) => {
+    const weakestFirst = [...(pool.length ? pool : group)].sort((a, b) => {
       const [aw, ad, ar] = strength(a)
       const [bw, bd, br] = strength(b)
       return aw - bw || ad - bd || ar - br
     })
+    // the weakest player sits out, unless that leaves the others only rematches
+    const lowest =
+      weakestFirst.find((p) =>
+        canAvoidRematches(
+          group.filter((g) => g.name !== p.name).map((g) => g.name),
+          hasPlayed,
+        ),
+      ) ?? weakestFirst[0]
     byes.push(
       createBye({ name: lowest.name, rating: lowest.rating }, r, `${idPrefix}-${byes.length}`),
     )
@@ -144,17 +163,100 @@ function isFinal(states: PlayerState[], group: { name: string }[], r: number): b
 
 type Pair = [WaitingBase, WaitingBase]
 
-/** Greedy by rating: each player meets the best rated opponent he has not played yet. */
-function greedyPairs(list: WaitingBase[], blocked: (a: string, b: string) => boolean): Pair[] {
-  const rest = [...list]
+/** Win record of a player, used to match players of the same level. */
+type Record = (name: string) => { wins: number; diff: number }
+
+/** A player about to reach the group's round: he is in a match of the previous round, so he ends with w or w+1 wins. */
+interface Incoming {
+  name: string
+  wins: number
+}
+
+/** Win gap two players would have; 0 when equal. */
+const gapOf = (rec: Record, a: string, b: string) => Math.abs(rec(a).wins - rec(b).wins)
+
+/** Best record first: wins, then point difference, then initial rating. */
+function byRecord(list: WaitingBase[], rec: Record): WaitingBase[] {
+  return [...list].sort(
+    (a, b) =>
+      rec(b.name).wins - rec(a.name).wins ||
+      rec(b.name).diff - rec(a.name).diff ||
+      b.rating - a.rating,
+  )
+}
+
+/**
+ * Greedy by record: each player meets the unplayed opponent with the closest number of wins. A pair with a gap is
+ * held back while a player about to arrive could give either of them a closer opponent (a free player is better
+ * off waiting a little than meeting someone of a very different level).
+ */
+function pairByRecord(
+  list: WaitingBase[],
+  rec: Record,
+  blocked: (a: string, b: string) => boolean,
+  incoming: Incoming[] = [],
+  /** Everybody who still has to be paired for this round (free, in a match of the previous round, or lagging). */
+  pool?: string[],
+): Pair[] {
+  const rest = byRecord(list, rec)
+  const left = new Set(pool)
   const pairs: Pair[] = []
+  const couldBeCloser = (name: string, gap: number) =>
+    incoming.some((x) => {
+      if (blocked(name, x.name)) return false
+      const w = rec(name).wins
+      return Math.min(Math.abs(x.wins - w), Math.abs(x.wins + 1 - w)) < gap
+    })
   while (rest.length >= 2) {
     const a = rest.shift()!
-    const idx = rest.findIndex((b) => !blocked(a.name, b.name))
-    if (idx < 0) continue
-    pairs.push([a, rest.splice(idx, 1)[0]])
+    // opponents never met, closest record first (then closest rank)
+    const options = rest
+      .map((b, i) => ({ b, i, gap: gapOf(rec, a.name, b.name) }))
+      .filter((o) => !blocked(a.name, o.b.name))
+      .sort((x, y) => x.gap - y.gap || x.i - y.i)
+    if (!options.length) continue
+    const { gap } = options[0]
+    if (gap > 0 && (couldBeCloser(a.name, gap) || couldBeCloser(options[0].b.name, gap))) continue
+    // a pair must not leave the rest of the round unable to avoid rematches
+    const pick = pool
+      ? options.find((o) =>
+          canAvoidRematches(
+            [...left].filter((n) => n !== a.name && n !== o.b.name),
+            blocked,
+          ),
+        )
+      : options[0]
+    if (!pick) continue
+    pairs.push([a, rest.splice(pick.i, 1)[0]])
+    left.delete(a.name)
+    left.delete(pick.b.name)
   }
   return pairs
+}
+
+/**
+ * True if `names` can all be paired without a rematch (one may stay out when the number is odd: he gets an
+ * exemption). Budgeted search; when the budget runs out it assumes yes rather than blocking the pairing.
+ */
+function canAvoidRematches(names: string[], blocked: (a: string, b: string) => boolean): boolean {
+  let budget = 60000
+  const solve = (rest: string[], skips: number): boolean => {
+    if (rest.length <= 1) return true
+    if (budget-- <= 0) return true
+    const [a, ...others] = rest
+    for (let i = 0; i < others.length; i++) {
+      if (
+        !blocked(a, others[i]) &&
+        solve(
+          others.filter((_, k) => k !== i),
+          skips,
+        )
+      )
+        return true
+    }
+    return skips > 0 && solve(others, skips - 1)
+  }
+  return solve(names, names.length % 2)
 }
 
 /** Pairs everybody without a rematch, if such a pairing exists (small final groups only). */
@@ -184,9 +286,8 @@ function perfectPairs(
  */
 export function autoPair(st: PairingState, idPrefix: string, limits: PairingLimits = {}): Match[] {
   const booked = [...st.pending, ...st.live, ...st.finished].filter((m) => !isBye(m)).length
-  const played = new Set(
-    st.finished.filter((m) => !isBye(m)).map((m) => pairKey(m.p1.name, m.p2.name)),
-  )
+  // matches being played or booked count too: their players will have met before the next round
+  const hasPlayed = playedPairs(st)
   const usedTables = new Set([...st.pending, ...st.live].map((m) => m.table))
   const nextTable = () => {
     let t = 1
@@ -199,15 +300,26 @@ export function autoPair(st: PairingState, idPrefix: string, limits: PairingLimi
   computeWaiting(st, limits).forEach((p) =>
     byRound.set(p.nextRound, [...(byRound.get(p.nextRound) ?? []), p]),
   )
-  const hasPlayed = (a: string, b: string) => played.has(pairKey(a, b))
+  const ranking = new Map(computeRanking(st.finished).map((r) => [r.name, r]))
+  const rec: Record = (name) => ({
+    wins: ranking.get(name)?.wins ?? 0,
+    diff: ranking.get(name)?.diff ?? 0,
+  })
 
   const created: Match[] = []
   byRound.forEach((list, round) => {
     const final = isFinal(states, list, round)
-    let pairs = final ? perfectPairs(list, hasPlayed) : null
-    if (!pairs) pairs = greedyPairs(list, hasPlayed)
+    const sorted = byRecord(list, rec)
+    // players finishing a match of the previous round will soon be free for this round
+    const incoming = states
+      .filter((p) => p.busy && p.level === round)
+      .map((p) => ({ name: p.name, wins: rec(p.name).wins }))
+    // everybody who will still play this round, whatever he is doing now
+    const pool = states.filter((p) => p.level <= round).map((p) => p.name)
+    let pairs = final ? perfectPairs(sorted, hasPlayed) : null
+    if (!pairs) pairs = pairByRecord(sorted, rec, hasPlayed, incoming, pool)
     if (final && pairs.length * 2 < list.length - (list.length % 2)) {
-      pairs = greedyPairs(list, () => false) // rematch as a last resort
+      pairs = pairByRecord(sorted, rec, () => false) // rematch as a last resort
     }
     for (const [a, b] of pairs) {
       if (limits.maxTotalMatches && booked + created.length >= limits.maxTotalMatches) return

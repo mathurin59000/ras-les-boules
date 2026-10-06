@@ -53,6 +53,44 @@ describe('autoPair', () => {
   })
 })
 
+describe('autoPair by record', () => {
+  const done = (id: string, round: number, w: string, l: string): Match => ({
+    ...match(id, round, w, l),
+    score: '30-10',
+  })
+  // round 1: A beat B, C beat D (C and D still busy in another match of round 1 for the held-back cases)
+  const base = (live: Match[]) => ({
+    pending: [],
+    live,
+    finished: [done('f1', 1, 'A', 'B')],
+    waitingBase: [],
+  })
+
+  it('keeps a winner waiting while another winner could still come', () => {
+    // C–D is being played: A (1 win) must not take B (0 win) while C may become a second 1-win player
+    const st = base([match('l', 1, 'C', 'D', 1)])
+    expect(autoPair(st, 'x')).toEqual([])
+  })
+  it('pairs the closest records once nobody else can arrive', () => {
+    const st = {
+      ...base([]),
+      finished: [done('f1', 1, 'A', 'B'), done('f2', 1, 'C', 'D')],
+    }
+    const [m] = autoPair(st, 'x').filter((x) => x.round === 2)
+    const names = autoPair(st, 'x').map((x) => [x.p1.name, x.p2.name].sort().join('-'))
+    expect(m).toBeDefined()
+    expect(names.sort()).toEqual(['A-C', 'B-D']) // winners together, losers together
+  })
+  it('plays at once when the records are equal', () => {
+    const st = {
+      ...base([match('l', 1, 'C', 'D', 1)]),
+      finished: [done('f1', 1, 'A', 'B'), done('f2', 1, 'E', 'F')],
+    }
+    const names = autoPair(st, 'x').map((x) => [x.p1.name, x.p2.name].sort().join('-'))
+    expect(names).toContain('A-E')
+  })
+})
+
 describe('formatScore / advantage', () => {
   it('clamps the loser points', () => {
     expect(formatScore('p1', 30, 12)).toBe('30-12')

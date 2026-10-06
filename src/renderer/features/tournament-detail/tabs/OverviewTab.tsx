@@ -11,6 +11,7 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { computeWaiting, limitsFrom } from '@/domain/pairing'
+import { computeRanking } from '@/domain/ranking'
 import { useAppStore } from '@/stores/app-store'
 import { MatchCard } from '../match-card'
 
@@ -78,6 +79,11 @@ export function OverviewTab({ settings, started, onStartMatch, onEnterResult }: 
     [started, pending, live, finished, waitingBase, settings],
   )
 
+  const records = useMemo(
+    () => new Map(computeRanking(finished).map((r) => [r.name, r])),
+    [finished],
+  )
+
   return (
     <div className="flex flex-col gap-7">
       <Section title="Matchs à lancer">
@@ -106,7 +112,7 @@ export function OverviewTab({ settings, started, onStartMatch, onEnterResult }: 
                 <TableRow>
                   <TableHead>Joueur</TableHead>
                   <TableHead className="w-30 text-right">Points</TableHead>
-                  <TableHead className="w-50">Statut</TableHead>
+                  <TableHead className="w-50">En attente (bilan)</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -122,7 +128,10 @@ export function OverviewTab({ settings, started, onStartMatch, onEnterResult }: 
                       {p.rating.toLocaleString('fr-FR')} pts
                     </TableCell>
                     <TableCell>
-                      <StatusBadge>En attente du tour {p.nextRound}</StatusBadge>
+                      <StatusBadge>
+                        Tour {p.nextRound} · {records.get(p.name)?.wins ?? 0} V ·{' '}
+                        {records.get(p.name)?.losses ?? 0} D
+                      </StatusBadge>
                     </TableCell>
                   </TableRow>
                 ))}

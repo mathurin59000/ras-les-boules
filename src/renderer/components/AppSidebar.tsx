@@ -10,7 +10,7 @@ import {
   Trophy,
 } from 'lucide-react'
 import type { UpdateState } from '@shared/types'
-import logo from '@/assets/logo.jpeg'
+import logo from '@/assets/logo.png'
 import { cn } from '@/lib/utils'
 import { useUiStore } from '@/stores/ui-store'
 
@@ -70,7 +70,7 @@ export function AppSidebar() {
       )}
     >
       <div className={cn('flex items-center gap-2.5 px-2', collapsed && 'justify-center')}>
-        <img src={logo} alt="Ras les boules" className="size-7 shrink-0 rounded-lg object-cover" />
+        <img src={logo} alt="Ras les boules" className="size-7 shrink-0 object-cover" />
         {!collapsed && (
           <span className="font-serif text-[19px] leading-none tracking-tight whitespace-nowrap">
             Ras les boules

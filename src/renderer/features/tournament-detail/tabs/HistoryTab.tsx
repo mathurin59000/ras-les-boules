@@ -72,7 +72,9 @@ export function HistoryTab({ started }: { started: boolean }) {
 
   const rows = useMemo(() => {
     const q = query.trim().toLowerCase()
-    return all
+    // finished matches are stored chronologically: reverse first so the stable sort keeps newest first
+    return [...all]
+      .reverse()
       .filter(
         (r) =>
           (status === 'all' || r.status === status) &&
@@ -80,7 +82,7 @@ export function HistoryTab({ started }: { started: boolean }) {
           (!q || r.p1.toLowerCase().includes(q) || r.p2.toLowerCase().includes(q)),
       )
       .sort(
-        (a, b) => a.round - b.round || MATCH_STATUS[a.status].order - MATCH_STATUS[b.status].order,
+        (a, b) => b.round - a.round || MATCH_STATUS[b.status].order - MATCH_STATUS[a.status].order,
       )
   }, [all, query, round, status])
 

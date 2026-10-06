@@ -1,6 +1,6 @@
 {
   "name": "ras-les-boules",
-  "version": "0.2.2",
+  "version": "0.3.0",
   "private": true,
   "description": "Ras les boules — gestion de tournois de tennis de table",
   "main": "./out/main/index.js",

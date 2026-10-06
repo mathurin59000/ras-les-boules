@@ -1,3 +1,6 @@
+import { existsSync, mkdtempSync, readFileSync } from 'node:fs'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
 import { expect, test } from '@playwright/test'
 import { DATASETS } from './fixtures/datasets'
 import {
@@ -62,6 +65,22 @@ for (const ds of DATASETS) {
       }
       const order = ranking.map((r) => r.wins)
       expect(order).toEqual([...order].sort((a, b) => b - a))
+
+      // export modal: shareable top 10 + CSV download
+      await page.getByRole('button', { name: 'Exporter les résultats' }).click()
+      const text = await page.getByLabel('Texte du classement').inputValue()
+      expect(text).toContain(ranking[0].name)
+      expect(text.split('\n').length).toBeLessThanOrEqual(2 + 10)
+      // Playwright has no download event for Electron: save through the main process instead
+      const csvPath = join(mkdtempSync(join(tmpdir(), 'rlb-csv-')), 'export.csv')
+      await app.evaluate(({ session }, path) => {
+        session.defaultSession.once('will-download', (_e, item) => item.setSavePath(path))
+      }, csvPath)
+      await page.getByRole('button', { name: 'Télécharger le CSV' }).click()
+      await expect.poll(() => existsSync(csvPath)).toBe(true)
+      const csv = readFileSync(csvPath, 'utf8')
+      for (const section of ['Classement', 'Historique', 'Joueurs']) expect(csv).toContain(section)
+      for (const [first, last] of ds.players) expect(csv).toContain(`${first} ${last}`)
     } finally {
       await closeApp(app)
     }

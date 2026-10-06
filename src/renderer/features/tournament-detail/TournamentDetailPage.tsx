@@ -19,11 +19,11 @@ import { modeLabel, STATUS_META } from '@/domain/constants'
 import { settingsFor } from '@/domain/defaults'
 import { frDate } from '@/domain/format'
 import { appearAfter } from '@/lib/animation'
-import { notify } from '@/lib/notify'
 import { cn } from '@/lib/utils'
 import { RegistrationDialog } from '@/features/players/RegistrationDialog'
 import { useAppStore } from '@/stores/app-store'
 import { useProgressOf } from '@/stores/use-progress'
+import { ExportDialog } from './ExportDialog'
 import { ResultDialog } from './ResultDialog'
 import { HistoryTab } from './tabs/HistoryTab'
 import { OverviewTab } from './tabs/OverviewTab'
@@ -53,6 +53,7 @@ export function TournamentDetailPage() {
 
   const [confirmStart, setConfirmStart] = useState(false)
   const [registering, setRegistering] = useState(false)
+  const [exporting, setExporting] = useState(false)
   const [startingMatch, setStartingMatch] = useState<Match | null>(null)
   const [resultMatch, setResultMatch] = useState<Match | null>(null)
 
@@ -96,11 +97,7 @@ export function TournamentDetailPage() {
               label: 'Exporter les résultats',
               variant: 'outline',
               icon: Download,
-              run: () =>
-                notify.info(
-                  'Export lancé',
-                  `Les résultats de « ${tournament.name} » sont en cours d'export.`,
-                ),
+              run: () => setExporting(true),
             }
 
   return (
@@ -207,6 +204,7 @@ export function TournamentDetailPage() {
         )}
       </div>
 
+      <ExportDialog tournament={tournament} open={exporting} onClose={() => setExporting(false)} />
       <RegistrationDialog
         open={registering}
         tournamentId={tournament.id}

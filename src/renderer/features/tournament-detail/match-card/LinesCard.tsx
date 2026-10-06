@@ -18,7 +18,11 @@ function Line({ side }: { side: SideView }) {
 export function LinesCard(props: MatchCardProps) {
   const [a, b] = matchSides(props)
   return (
-    <div data-testid="match-card" onClick={props.onAction} className={`${CARD_CLASS} flex flex-col gap-3 px-4 py-3.5`}>
+    <div
+      data-testid="match-card"
+      onClick={props.onAction}
+      className={`${CARD_CLASS} flex flex-col gap-3 px-4 py-3.5`}
+    >
       <div className="flex items-center justify-between gap-2">
         <StatusPill kind={props.kind} />
         <RoundPill round={props.match.round} />

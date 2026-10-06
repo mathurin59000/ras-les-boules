@@ -89,6 +89,19 @@ nav .links a:hover{opacity:.7}
 @keyframes pulse{50%{opacity:.25}}
 @media(max-width:640px){.app{grid-template-columns:1fr}.app .side{display:none}}
 
+/* real screenshots in a window frame */
+.win{background:#fff;border-radius:18px 18px 0 0;overflow:hidden;box-shadow:0 -10px 80px rgba(0,0,0,.35)}
+.win .bar{display:flex;gap:7px;padding:12px 16px;background:#f3ebe6}
+.win .bar i{width:11px;height:11px;border-radius:50%;background:#e0cfc6}
+.win img{display:block;width:100%;height:auto}
+.gallery{display:grid;grid-template-columns:1fr 1fr;gap:28px}
+@media(max-width:860px){.gallery{grid-template-columns:1fr}}
+.gallery figure{margin:0}
+.gallery .win{border-radius:16px;box-shadow:0 24px 60px rgba(193,74,40,.18);border:1px solid var(--line)}
+.gallery figcaption{margin-top:16px;color:var(--ink-2);font-size:15.5px}
+.gallery figcaption b{display:block;color:var(--ink);font-family:var(--serif);font-weight:400;font-size:22px;margin-bottom:4px}
+.os-links{margin-top:22px!important;font-size:14px!important}
+.os-links a{text-decoration:underline;text-underline-offset:3px;margin:0 8px}
 /* sections */
 section{padding:120px 0}
 .head{max-width:640px;margin-bottom:56px}
@@ -166,7 +179,7 @@ footer{padding:40px 0;color:var(--ink-2);font-size:14px;text-align:center}
       <h1 class="rv" style="--i:1">Vos tournois, <em>sans prise de tête.</em></h1>
       <p class="lead rv" style="--i:2">Inscriptions, appariements, scores en direct, handicap et classement. Ras les boules organise tout, pour que vous gardiez la raquette en main.</p>
       <div class="cta rv" style="--i:3">
-        <a class="btn btn-main" href="#download">⬇ Télécharger</a>
+        <a class="btn btn-main dl-main" href="https://github.com/mathurin59000/ras-les-boules/releases/latest">⬇ Télécharger</a>
         <a class="btn btn-ghost" href="#features">Découvrir</a>
       </div>
       <div class="meta rv" style="--i:4">macOS · Windows · Linux — gratuit, mises à jour automatiques</div>
@@ -175,21 +188,8 @@ footer{padding:40px 0;color:var(--ink-2);font-size:14px;text-align:center}
   </div>
   <div class="wrap">
     <div class="shot" id="shot">
-      <div class="app">
-        <div class="side"><b><img src="icon.png" alt="">Ras les boules</b><span class="on">🏆 Tournois</span><span>👥 Joueurs</span><span>🏓 Matchs</span><span>⚙ Paramètres</span></div>
-        <div class="main">
-          <div class="stats">
-            <div class="stat"><small>Joueurs inscrits</small><strong>32</strong></div>
-            <div class="stat"><small>Matchs joués</small><strong>47</strong></div>
-            <div class="stat"><small>Tour en cours</small><strong>4 / 5</strong></div>
-          </div>
-          <table>
-            <tr><th>Match</th><th>Score</th><th>Statut</th></tr>
-            <tr><td><b>Léa M.</b> vs Hugo B.</td><td>2 – 1</td><td><span class="pill live"><span class="dot"></span>En cours</span></td></tr>
-            <tr><td><b>Sam D.</b> vs Inès R.</td><td>3 – 0</td><td><span class="pill done">Terminé</span></td></tr>
-            <tr><td><b>Tom P.</b> vs Clara V.</td><td>—</td><td><span class="pill wait">À lancer</span></td></tr>
-          </table>
-        </div>
+      <div class="win"><div class="bar"><i></i><i></i><i></i></div>
+        <img src="img/overview.png" width="1440" height="900" alt="Écran principal de Ras les boules : matchs à lancer et matchs en cours d'un tournoi">
       </div>
     </div>
   </div>
@@ -217,14 +217,8 @@ footer{padding:40px 0;color:var(--ink-2);font-size:14px;text-align:center}
       <li>Export des résultats pour partager la soirée.</li>
     </ul>
   </div>
-  <div class="panel rv r" id="rankPanel">
-    <div class="rank">
-      <div class="row"><i>1</i><span>Léa M.</span><div class="track"><div class="fill" style="--w:96%"></div></div><span class="n" data-to="9">0</span></div>
-      <div class="row"><i>2</i><span>Sam D.</span><div class="track"><div class="fill" style="--w:80%"></div></div><span class="n" data-to="8">0</span></div>
-      <div class="row"><i>3</i><span>Hugo B.</span><div class="track"><div class="fill" style="--w:62%"></div></div><span class="n" data-to="6">0</span></div>
-      <div class="row"><i>4</i><span>Inès R.</span><div class="track"><div class="fill" style="--w:45%"></div></div><span class="n" data-to="4">0</span></div>
-      <div class="row"><i>5</i><span>Tom P.</span><div class="track"><div class="fill" style="--w:28%"></div></div><span class="n" data-to="3">0</span></div>
-    </div>
+  <div class="win rv r" style="border-radius:18px;box-shadow:0 30px 70px rgba(193,74,40,.18)"><div class="bar"><i></i><i></i><i></i></div>
+    <img src="img/ranking.png" width="1440" height="900" loading="lazy" alt="Onglet Classement : victoires, défaites, différence de points">
   </div>
 </div></section>
 
@@ -249,6 +243,15 @@ footer{padding:40px 0;color:var(--ink-2);font-size:14px;text-align:center}
   </div>
 </div></section>
 
+<section id="screens"><div class="wrap">
+  <div class="head rv"><div class="eyebrow">En images</div><h2>L'appli, telle qu'elle est vraiment.</h2><p>Des captures de la version actuelle : de la création du tournoi au partage des résultats.</p></div>
+  <div class="gallery">
+    <figure class="rv l"><div class="win"><div class="bar"><i></i><i></i><i></i></div><img src="img/wizard.png" width="1440" height="900" loading="lazy" alt="Assistant de création d'un tournoi"></div><figcaption><b>Création en 2 étapes</b>Nom, format, handicap et condition de fin.</figcaption></figure>
+    <figure class="rv r"><div class="win"><div class="bar"><i></i><i></i><i></i></div><img src="img/history.png" width="1440" height="900" loading="lazy" alt="Historique des matchs du plus récent au plus ancien"></div><figcaption><b>Historique complet</b>Filtrez par joueur, tour ou statut.</figcaption></figure>
+    <figure class="rv" style="grid-column:1/-1"><div class="win" style="max-width:760px;margin:0 auto"><div class="bar"><i></i><i></i><i></i></div><img src="img/export.png" width="1440" height="900" loading="lazy" alt="Fenêtre d'export : texte à partager et fichier CSV"></div><figcaption style="text-align:center"><b>Export et partage</b>Un classement prêt à coller dans une conversation, et un CSV complet.</figcaption></figure>
+  </div>
+</div></section>
+
 <section class="band" id="how"><div class="wrap">
   <div class="head rv"><div class="eyebrow">Comment ça marche</div><h2>Trois étapes. C'est tout.</h2></div>
   <div class="steps">
@@ -264,10 +267,10 @@ footer{padding:40px 0;color:var(--ink-2);font-size:14px;text-align:center}
     <h2>Prêt pour le premier service ?</h2>
     <p>Téléchargez la dernière version. L'appli se met à jour toute seule dès qu'une nouvelle release sort.</p>
     <div class="os">
-      <a class="btn btn-main" href="https://github.com/mathurin59000/ras-les-boules/releases/latest">⬇ Dernière version</a>
+      <a class="btn btn-main dl-main" href="https://github.com/mathurin59000/ras-les-boules/releases/latest">⬇ Dernière version</a>
       <a class="btn btn-ghost" href="https://github.com/mathurin59000/ras-les-boules">Code source</a>
     </div>
-    <p style="margin:22px 0 0;font-size:14px">macOS (.dmg) · Windows (.exe) · Linux (.AppImage)</p>
+    <p class="os-links" id="osLinks">macOS (.dmg) · Windows (.exe) · Linux (.AppImage)</p>
   </div>
 </div></section>
 
@@ -300,6 +303,21 @@ const io=new IntersectionObserver(es=>es.forEach(e=>{
 }),{threshold:.2});
 document.querySelectorAll('.rv').forEach(el=>io.observe(el));
 if(matchMedia('(prefers-reduced-motion:reduce)').matches)document.querySelectorAll('.n').forEach(n=>n.textContent=n.dataset.to);
+
+/* download for the visitor's OS; without JS / on failure the links keep pointing to the releases page */
+(async()=>{
+  const ua=navigator.userAgent,plat=(navigator.userAgentData?.platform||navigator.platform||'');
+  const os=/android|iphone|ipad|ipod/i.test(ua)?'other':/win/i.test(plat+ua)?'windows':/mac/i.test(plat+ua)?'mac':/linux|x11/i.test(plat+ua)?'linux':'other';
+  const kinds={mac:{label:'macOS (Apple Silicon)',re:/\.dmg$/},windows:{label:'Windows',re:/Setup.*\.exe$/},linux:{label:'Linux',re:/\.AppImage$/}};
+  try{
+    const r=await fetch('https://api.github.com/repos/mathurin59000/ras-les-boules/releases/latest');
+    if(!r.ok)throw 0;
+    const rel=await r.json(),url=k=>rel.assets.find(a=>kinds[k].re.test(a.name))?.browser_download_url;
+    if(kinds[os]&&url(os))document.querySelectorAll('.dl-main').forEach(a=>{a.href=url(os);a.textContent='⬇ Télécharger pour '+kinds[os].label+' · '+rel.tag_name});
+    const box=document.getElementById('osLinks');
+    box.innerHTML=Object.keys(kinds).filter(url).map(k=>`<a href="${url(k)}">${kinds[k].label}</a>`).join('·')+` · <a href="${rel.html_url}">Notes de version</a>`;
+  }catch(e){/* keep the releases page link */}
+})();
 </script>
 </body>
 </html>

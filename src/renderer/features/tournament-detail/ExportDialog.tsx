@@ -63,7 +63,7 @@ function ExportBody({ tournament, onClose }: Omit<Props, 'open'>) {
           aria-label="Texte du classement"
           value={text}
           rows={Math.min(14, text.split('\n').length + 1)}
-          onFocus={(e) => e.currentTarget.select()}
+          onClick={(e) => e.currentTarget.select()}
           className="w-full resize-none rounded-md border bg-muted/40 p-3 font-mono text-[13px] leading-relaxed"
         />
         <Button variant="outline" onClick={copy} className="self-start">

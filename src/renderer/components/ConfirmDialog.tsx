@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react'
+import { useRef, type ReactNode } from 'react'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -34,9 +34,17 @@ export function ConfirmDialog({
   destructive,
   onConfirm,
 }: Props) {
+  const confirmRef = useRef<HTMLButtonElement>(null)
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
-      <AlertDialogContent>
+      <AlertDialogContent
+        // Enter confirms, except for destructive actions where Cancel keeps the focus
+        onOpenAutoFocus={(e) => {
+          if (destructive) return
+          e.preventDefault()
+          confirmRef.current?.focus()
+        }}
+      >
         <AlertDialogHeader>
           <AlertDialogTitle>{title}</AlertDialogTitle>
           {description && <AlertDialogDescription>{description}</AlertDialogDescription>}
@@ -45,6 +53,7 @@ export function ConfirmDialog({
         <AlertDialogFooter>
           <AlertDialogCancel>Annuler</AlertDialogCancel>
           <AlertDialogAction
+            ref={confirmRef}
             className={cn(destructive && buttonVariants({ variant: 'destructive' }))}
             onClick={onConfirm}
           >

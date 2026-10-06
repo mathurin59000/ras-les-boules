@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { appearAfter } from '@/lib/animation'
 import { useAppStore } from '@/stores/app-store'
 import { useUiStore } from '@/stores/ui-store'
+import { ExportDialog } from '@/features/tournament-detail/ExportDialog'
 import { RenameDialog } from './RenameDialog'
 import { StatCards } from './StatCards'
 import { TournamentFilters } from './TournamentFilters'
@@ -29,6 +30,7 @@ export function DashboardPage() {
   const [page, setPage] = useState(1)
   const [renaming, setRenaming] = useState<Tournament | null>(null)
   const [deleting, setDeleting] = useState<Tournament | null>(null)
+  const [exporting, setExporting] = useState<Tournament | null>(null)
 
   const rows = useMemo(
     () => filterAndSort(tournaments, { search, statuses, sortKey: sort.key, sortDir: sort.dir }),
@@ -88,6 +90,7 @@ export function DashboardPage() {
             onSort={toggleSort}
             onOpen={(t) => navigate(`/tournaments/${t.id}`)}
             onRename={setRenaming}
+            onExport={setExporting}
             onDelete={setDeleting}
           />
           <div className="flex items-center justify-end gap-3">
@@ -115,6 +118,7 @@ export function DashboardPage() {
       )}
 
       <RenameDialog tournament={renaming} onClose={() => setRenaming(null)} />
+      {exporting && <ExportDialog tournament={exporting} open onClose={() => setExporting(null)} />}
       <ConfirmDialog
         open={!!deleting}
         onOpenChange={(o) => !o && setDeleting(null)}

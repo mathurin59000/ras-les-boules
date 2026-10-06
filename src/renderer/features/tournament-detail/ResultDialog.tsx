@@ -62,7 +62,15 @@ function ResultForm({ match, tournamentId, settings, onClose }: Props & { match:
           Tour {match.round} · {match.p1.name} vs {match.p2.name}
         </DialogDescription>
       </DialogHeader>
-      <div className="flex flex-col gap-4">
+      <form
+        id="result-form"
+        noValidate
+        className="flex flex-col gap-4"
+        onSubmit={(e) => {
+          e.preventDefault()
+          confirm()
+        }}
+      >
         <div>
           <Label className="mb-2">Gagnant</Label>
           <div role="radiogroup" className="grid grid-cols-2 gap-2.5">
@@ -76,7 +84,17 @@ function ResultForm({ match, tournamentId, settings, onClose }: Props & { match:
                   aria-checked={selected}
                   tabIndex={0}
                   onClick={() => setWinner(k)}
-                  onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && setWinner(k)}
+                  onKeyDown={(e) => {
+                    if (e.key === ' ') {
+                      e.preventDefault()
+                      setWinner(k)
+                    } else if (e.key === 'Enter') {
+                      e.preventDefault()
+                      // Enter on the chosen winner confirms the result
+                      if (selected) confirm()
+                      else setWinner(k)
+                    }
+                  }}
                   className={cn(
                     'flex cursor-pointer items-center gap-2.5 rounded-lg border p-3 transition-colors hover:border-primary',
                     selected && 'border-primary bg-primary/10',
@@ -107,12 +125,12 @@ function ResultForm({ match, tournamentId, settings, onClose }: Props & { match:
             </div>
           </div>
         </div>
-      </div>
+      </form>
       <DialogFooter>
-        <Button variant="outline" onClick={onClose}>
+        <Button type="button" variant="outline" onClick={onClose}>
           Annuler
         </Button>
-        <Button disabled={!winner} onClick={confirm}>
+        <Button type="submit" form="result-form" disabled={!winner}>
           Confirmer
         </Button>
       </DialogFooter>

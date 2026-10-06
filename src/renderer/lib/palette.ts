@@ -1,4 +1,5 @@
-export type PaletteKey = 'terracotta' | 'lavande' | 'sauge' | 'brume'
+export type PaletteKey =
+  'terracotta' | 'rosePoudre' | 'ocean' | 'miel' | 'prune' | 'lavande' | 'sauge' | 'brume'
 
 type Hue = [hue: number, chroma: number]
 interface Palette {
@@ -15,6 +16,15 @@ export const PALETTES: Record<PaletteKey, Palette> = {
     secondary: [150, 0.05],
     accent: [80, 0.1],
   },
+  rosePoudre: {
+    label: 'Rose poudré',
+    primary: [10, 0.1],
+    secondary: [350, 0.05],
+    accent: [60, 0.1],
+  },
+  ocean: { label: 'Océan', primary: [225, 0.09], secondary: [180, 0.06], accent: [50, 0.1] },
+  miel: { label: 'Miel', primary: [78, 0.12], secondary: [140, 0.05], accent: [25, 0.1] },
+  prune: { label: 'Prune', primary: [335, 0.09], secondary: [285, 0.05], accent: [75, 0.1] },
   lavande: { label: 'Lavande', primary: [292, 0.1], secondary: [205, 0.06], accent: [30, 0.1] },
   sauge: { label: 'Sauge', primary: [165, 0.07], secondary: [235, 0.06], accent: [55, 0.1] },
   brume: { label: 'Brume', primary: [255, 0.08], secondary: [185, 0.06], accent: [10, 0.09] },

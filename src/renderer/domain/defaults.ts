@@ -14,6 +14,13 @@ export const DEFAULT_SETTINGS: TournamentSettings = {
   endConditionValue: 5,
 }
 
+/** Starting values of the creation wizard (handicap on, no cap). Tournaments saved earlier keep DEFAULT_SETTINGS. */
+export const NEW_TOURNAMENT_SETTINGS: TournamentSettings = {
+  ...DEFAULT_SETTINGS,
+  handicapEnabled: true,
+  handicapCap: 0,
+}
+
 export function settingsFor(
   tournament: Tournament,
   byId: Record<string, TournamentSettings>,

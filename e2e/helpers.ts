@@ -37,7 +37,9 @@ export async function createTournament(page: Page, name: string, ds: Dataset) {
   await page.getByLabel('Nom du tournoi').fill(name)
   await page.getByRole('button', { name: 'Suivant' }).click()
   const row = (label: string) => page.getByText(label, { exact: true }).locator('..')
-  if (ds.handicap) await row('Activé').getByRole('switch').click()
+  // the wizard starts with the handicap on
+  const handicap = row('Activé').getByRole('switch')
+  if ((await handicap.getAttribute('aria-checked')) !== String(ds.handicap)) await handicap.click()
   await row('Valeur').getByRole('spinbutton').fill(String(ds.rounds))
   await page.getByRole('button', { name: 'Créer le tournoi' }).click()
   await expect(page.getByRole('heading', { level: 1, name })).toBeVisible()

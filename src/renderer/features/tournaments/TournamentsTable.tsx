@@ -1,4 +1,4 @@
-import { ArrowDown, ArrowUp, MoreVertical, Pencil, Trash2 } from 'lucide-react'
+import { ArrowDown, ArrowUp, Download, MoreVertical, Pencil, Trash2 } from 'lucide-react'
 import type { Tournament } from '@shared/types'
 import { Button } from '@/components/ui/button'
 import {
@@ -32,6 +32,7 @@ interface Props {
   onSort: (key: SortKey) => void
   onOpen: (t: Tournament) => void
   onRename: (t: Tournament) => void
+  onExport: (t: Tournament) => void
   onDelete: (t: Tournament) => void
 }
 
@@ -68,6 +69,7 @@ export function TournamentsTable({
   onSort,
   onOpen,
   onRename,
+  onExport,
   onDelete,
 }: Props) {
   const sort = { sortKey, sortDir, onSort }
@@ -124,6 +126,11 @@ export function TournamentsTable({
                       <DropdownMenuItem onClick={() => onRename(t)}>
                         <Pencil /> Renommer
                       </DropdownMenuItem>
+                      {t.status === 'completed' && (
+                        <DropdownMenuItem onClick={() => onExport(t)}>
+                          <Download /> Exporter les résultats
+                        </DropdownMenuItem>
+                      )}
                       <DropdownMenuItem variant="destructive" onClick={() => onDelete(t)}>
                         <Trash2 /> Supprimer
                       </DropdownMenuItem>

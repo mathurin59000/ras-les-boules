@@ -19,7 +19,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { MODE_OPTIONS } from '@/domain/constants'
-import { DEFAULT_SETTINGS } from '@/domain/defaults'
+import { NEW_TOURNAMENT_SETTINGS } from '@/domain/defaults'
 import { cn } from '@/lib/utils'
 import { useAppStore } from '@/stores/app-store'
 import { useUiStore } from '@/stores/ui-store'
@@ -45,7 +45,7 @@ function WizardBody({ onDone }: { onDone: () => void }) {
   const navigate = useNavigate()
   const [step, setStep] = useState(0)
   const [name, setName] = useState('')
-  const [settings, setSettings] = useState<TournamentSettings>(DEFAULT_SETTINGS)
+  const [settings, setSettings] = useState<TournamentSettings>(NEW_TOURNAMENT_SETTINGS)
 
   const step1Valid = name.trim().length > 0
 

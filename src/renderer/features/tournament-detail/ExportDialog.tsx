@@ -10,6 +10,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
+import { realPlayers } from '@/domain/bye'
 import { buildCsv, buildShareText, exportFileName } from '@/domain/export'
 import { computeRanking } from '@/domain/ranking'
 import { notify } from '@/lib/notify'
@@ -33,6 +34,10 @@ function ExportBody({ tournament, onClose }: Omit<Props, 'open'>) {
   const finished = useAppStore((s) => s.finished)
   const roster = useAppStore((s) => s.rosters[tournament.id] ?? [])
   const [copied, setCopied] = useState(false)
+  // Matches are only kept for the last tournament started: check they are this tournament's
+  const names = new Set(roster.map((p) => p.name))
+  const available =
+    finished.length > 0 && finished.every((m) => realPlayers(m).every((p) => names.has(p.name)))
   const text = buildShareText(tournament.name, computeRanking(finished))
 
   const copy = async () => {
@@ -56,6 +61,12 @@ function ExportBody({ tournament, onClose }: Omit<Props, 'open'>) {
         <DialogTitle>Exporter les résultats</DialogTitle>
         <DialogDescription>{tournament.name}</DialogDescription>
       </DialogHeader>
+      {!available && (
+        <div className="rounded-lg border border-live-500/40 bg-live-50 p-3 text-[13px] text-live-700">
+          Les matchs de ce tournoi ne sont plus conservés : seul le dernier tournoi démarré garde
+          son historique. L'export n'est pas disponible.
+        </div>
+      )}
       <div className="flex flex-col gap-2">
         <div className="text-[13px] font-semibold">Texte à partager (top 10)</div>
         <textarea
@@ -66,7 +77,7 @@ function ExportBody({ tournament, onClose }: Omit<Props, 'open'>) {
           onClick={(e) => e.currentTarget.select()}
           className="w-full resize-none rounded-md border bg-muted/40 p-3 font-mono text-[13px] leading-relaxed"
         />
-        <Button variant="outline" onClick={copy} className="self-start">
+        <Button variant="outline" onClick={copy} disabled={!available} className="self-start">
           {copied ? <Check /> : <Copy />} {copied ? 'Copié' : 'Copier le texte'}
         </Button>
       </div>
@@ -77,7 +88,7 @@ function ExportBody({ tournament, onClose }: Omit<Props, 'open'>) {
         <Button variant="outline" onClick={onClose}>
           Fermer
         </Button>
-        <Button onClick={download}>
+        <Button onClick={download} disabled={!available}>
           <Download /> Télécharger le CSV
         </Button>
       </DialogFooter>

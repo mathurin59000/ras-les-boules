@@ -1,0 +1,305 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Ras les boules — Gérez vos tournois de tennis de table</title>
+<meta name="description" content="Appariements, scores, handicap, classement en direct et mises à jour automatiques : l'appli de bureau pour organiser vos tournois de tennis de table.">
+<meta property="og:title" content="Ras les boules">
+<meta property="og:description" content="L'appli de bureau pour organiser vos tournois de tennis de table.">
+<meta property="og:image" content="icon.png">
+<link rel="icon" href="icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;700;800&family=Young+Serif&display=swap" rel="stylesheet">
+<style>
+:root{
+  --t-50:#fdf1ea;--t-100:#fbdcca;--t-300:#f68f60;--t-400:#ee7440;--t-500:#d9582b;--t-600:#c14a28;--t-700:#a33c20;--t-800:#8a2f18;--t-900:#5e1f10;
+  --ink:#1d1210;--ink-2:#6b5650;--bg:#fff9f5;--card:#fff;--line:#f0dfd5;
+  --serif:'Young Serif',Georgia,serif;--sans:'Plus Jakarta Sans',system-ui,sans-serif;
+}
+*{box-sizing:border-box;margin:0}
+html{scroll-behavior:smooth}
+body{font:400 17px/1.6 var(--sans);color:var(--ink);background:var(--bg);overflow-x:hidden}
+a{color:inherit;text-decoration:none}
+.wrap{max-width:1120px;margin:0 auto;padding:0 24px}
+h1,h2,h3{font-family:var(--serif);font-weight:400;line-height:1.1;letter-spacing:-.01em}
+h2{font-size:clamp(32px,5vw,52px)}
+.eyebrow{font-weight:800;font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--t-600);margin-bottom:14px}
+.btn{display:inline-flex;align-items:center;gap:10px;padding:15px 26px;border-radius:14px;font-weight:700;transition:transform .2s,box-shadow .2s}
+.btn-main{background:#fff;color:var(--t-700);box-shadow:0 10px 30px rgba(94,31,16,.35)}
+.btn-main:hover{transform:translateY(-3px);box-shadow:0 16px 40px rgba(94,31,16,.45)}
+.btn-ghost{color:#fff;border:2px solid rgba(255,255,255,.55)}
+.btn-ghost:hover{background:rgba(255,255,255,.14)}
+.btn-dark{background:var(--t-600);color:#fff}
+.btn-dark:hover{background:var(--t-700);transform:translateY(-3px)}
+
+/* progress bar */
+#bar{position:fixed;top:0;left:0;height:4px;width:0;background:var(--t-300);z-index:50}
+
+/* nav */
+nav{position:fixed;inset:0 0 auto;z-index:40;transition:background .3s,box-shadow .3s}
+nav.solid{background:rgba(255,249,245,.9);backdrop-filter:blur(12px);box-shadow:0 1px 0 var(--line)}
+nav .wrap{display:flex;align-items:center;justify-content:space-between;height:68px}
+.brand{display:flex;align-items:center;gap:10px;font-family:var(--serif);font-size:20px;color:#fff;transition:color .3s}
+.brand img{width:34px;height:34px}
+nav.solid .brand{color:var(--ink)}
+nav .links{display:flex;gap:28px;font-weight:600;font-size:15px;color:#fff;transition:color .3s}
+nav.solid .links{color:var(--ink-2)}
+nav .links a:hover{opacity:.7}
+@media(max-width:700px){nav .links a:not(.dl){display:none}}
+
+/* hero */
+.hero{position:relative;background:radial-gradient(120% 90% at 85% 0%,var(--t-300) 0%,var(--t-600) 45%,var(--t-900) 100%);color:#fff;padding:150px 0 0;overflow:hidden}
+.hero::before,.hero::after{content:"";position:absolute;border-radius:50%;background:rgba(255,255,255,.07);will-change:transform}
+.hero::before{width:520px;height:520px;right:-140px;top:-120px;transform:translateY(calc(var(--sy,0)*.25px))}
+.hero::after{width:300px;height:300px;left:-90px;top:260px;transform:translateY(calc(var(--sy,0)*-.15px))}
+.hero .grid{display:grid;grid-template-columns:1.05fr .95fr;gap:40px;align-items:center;position:relative;z-index:1}
+.hero h1{font-size:clamp(44px,7vw,84px);margin-bottom:22px}
+.hero h1 em{font-style:normal;color:var(--t-100);position:relative}
+.hero p.lead{font-size:20px;max-width:520px;color:rgba(255,255,255,.88);margin-bottom:34px}
+.cta{display:flex;gap:14px;flex-wrap:wrap}
+.hero .meta{margin-top:20px;font-size:14px;color:rgba(255,255,255,.7)}
+.hero .logo{display:flex;justify-content:center}
+.hero .logo img{width:min(380px,80%);filter:drop-shadow(0 30px 50px rgba(0,0,0,.35));animation:float 6s ease-in-out infinite}
+@keyframes float{50%{transform:translateY(-16px) rotate(2deg)}}
+.ball{position:absolute;width:26px;height:26px;border-radius:50%;background:#fff;box-shadow:0 6px 16px rgba(0,0,0,.25);left:8%;bottom:140px;animation:bounce 2.4s cubic-bezier(.3,.7,.4,1) infinite;z-index:1}
+@keyframes bounce{0%,100%{transform:translate(0,0)}50%{transform:translate(120px,-150px)}}
+.shot{margin:64px auto 0;max-width:960px;position:relative;z-index:2;transform:translateY(calc(var(--sy,0)*-.06px)) perspective(1400px) rotateX(calc(8deg - var(--tilt,0)*8deg));transform-origin:50% 100%}
+@media(max-width:860px){.hero .grid{grid-template-columns:1fr}.hero .logo{display:none}.ball{display:none}}
+
+/* app mockup */
+.app{display:grid;grid-template-columns:170px 1fr;background:#fff;border-radius:18px 18px 0 0;overflow:hidden;box-shadow:0 -10px 80px rgba(0,0,0,.35);color:var(--ink);font-size:13px;text-align:left}
+.app .side{background:#1d1210;color:#fff;padding:18px 14px;display:flex;flex-direction:column;gap:6px}
+.app .side b{font-family:var(--serif);font-weight:400;font-size:15px;display:flex;align-items:center;gap:8px;margin-bottom:14px}
+.app .side b img{width:24px}
+.app .side span{padding:8px 10px;border-radius:8px;color:rgba(255,255,255,.65)}
+.app .side span.on{background:rgba(255,255,255,.1);color:#fff}
+.app .main{padding:20px;background:#faf6f3}
+.app .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}
+.app .stat{background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+.app .stat small{color:var(--ink-2);display:block}
+.app .stat strong{font-size:22px;font-family:var(--serif);font-weight:400;color:var(--t-600)}
+.app table{width:100%;border-collapse:collapse;background:#fff;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.app th{background:#f6eee9;text-align:left;padding:8px 12px;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-2)}
+.app td{padding:9px 12px;border-top:1px solid var(--line)}
+.pill{padding:2px 9px;border-radius:99px;font-size:11px;font-weight:700}
+.pill.live{background:#fde7dc;color:var(--t-700)}.pill.done{background:#e3f5ea;color:#106438}.pill.wait{background:#eaeef7;color:#45568a}
+.dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--t-500);margin-right:5px;animation:pulse 1.4s infinite}
+@keyframes pulse{50%{opacity:.25}}
+@media(max-width:640px){.app{grid-template-columns:1fr}.app .side{display:none}}
+
+/* sections */
+section{padding:120px 0}
+.head{max-width:640px;margin-bottom:56px}
+.head p{color:var(--ink-2);font-size:19px;margin-top:16px}
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:22px}
+@media(max-width:900px){.cards{grid-template-columns:1fr 1fr}}@media(max-width:600px){.cards{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:28px;transition:transform .25s,box-shadow .25s,border-color .25s}
+.card:hover{transform:translateY(-6px);box-shadow:0 20px 50px rgba(193,74,40,.15);border-color:var(--t-300)}
+.card .ic{width:52px;height:52px;border-radius:15px;display:grid;place-items:center;font-size:26px;background:linear-gradient(135deg,var(--t-300),var(--t-600));margin-bottom:18px;box-shadow:0 8px 18px rgba(193,74,40,.35)}
+.card h3{font-size:22px;margin-bottom:8px}
+.card p{color:var(--ink-2);font-size:15.5px}
+
+/* split showcase */
+.split{display:grid;grid-template-columns:1fr 1fr;gap:64px;align-items:center}
+.split.alt{background:var(--t-50)}
+@media(max-width:860px){.split{grid-template-columns:1fr;gap:36px}}
+.band{background:var(--t-50)}
+.panel{background:#fff;border:1px solid var(--line);border-radius:22px;padding:26px;box-shadow:0 30px 70px rgba(193,74,40,.14)}
+.rank{display:flex;flex-direction:column;gap:14px}
+.rank .row{display:grid;grid-template-columns:28px 90px 1fr 44px;align-items:center;gap:12px;font-weight:700;font-size:15px}
+.rank .row i{font-style:normal;color:var(--t-600);font-family:var(--serif)}
+.rank .track{height:12px;background:var(--t-50);border-radius:99px;overflow:hidden}
+.rank .fill{height:100%;width:var(--w);border-radius:99px;background:linear-gradient(90deg,var(--t-300),var(--t-600));transition:width 1.2s cubic-bezier(.2,.8,.2,1)}
+.js .rank .fill{width:0}
+.js .in .rank .fill{width:var(--w)}
+.hc{display:flex;align-items:center;justify-content:space-around;text-align:center;gap:10px}
+.hc .p{font-weight:800}.hc .p small{display:block;color:var(--ink-2);font-weight:500}
+.big{font-family:var(--serif);font-size:64px;color:var(--t-600);line-height:1}
+.hc .vs{font-family:var(--serif);color:var(--ink-2)}
+.bullets{list-style:none;padding:0;margin-top:22px;display:grid;gap:12px}
+.bullets li{display:flex;gap:12px;color:var(--ink-2)}
+.bullets li::before{content:"✓";flex:none;width:24px;height:24px;border-radius:50%;background:var(--t-600);color:#fff;font-size:13px;font-weight:800;display:grid;place-items:center;margin-top:2px}
+
+/* steps */
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;counter-reset:s}
+@media(max-width:800px){.steps{grid-template-columns:1fr}}
+.step{position:relative;padding:34px 28px;border-radius:22px;background:linear-gradient(160deg,var(--t-600),var(--t-800));color:#fff;counter-increment:s;overflow:hidden}
+.step::before{content:counter(s);position:absolute;right:16px;top:-14px;font-family:var(--serif);font-size:130px;color:rgba(255,255,255,.12)}
+.step h3{font-size:24px;margin-bottom:10px;position:relative}
+.step p{color:rgba(255,255,255,.85);position:relative}
+
+/* download */
+.dl-box{background:radial-gradient(120% 140% at 80% 0%,var(--t-300),var(--t-600) 50%,var(--t-900));border-radius:32px;color:#fff;text-align:center;padding:80px 24px;position:relative;overflow:hidden}
+.dl-box img{width:110px;margin-bottom:20px;filter:drop-shadow(0 16px 24px rgba(0,0,0,.3))}
+.dl-box h2{margin-bottom:14px}
+.dl-box p{max-width:520px;margin:0 auto 30px;color:rgba(255,255,255,.85)}
+.os{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+footer{padding:40px 0;color:var(--ink-2);font-size:14px;text-align:center}
+
+/* reveal */
+.js .rv{opacity:0;transform:translateY(40px);transition:opacity .8s cubic-bezier(.2,.8,.2,1),transform .8s cubic-bezier(.2,.8,.2,1);transition-delay:calc(var(--i,0)*90ms)}
+.js .rv.l{transform:translateX(-50px)}.js .rv.r{transform:translateX(50px)}
+.js .rv.in{opacity:1;transform:none}
+@media(prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  .js .rv{opacity:1;transform:none;transition:none}
+  .hero .logo img,.ball,.dot{animation:none}
+  .shot{transform:none}.hero::before,.hero::after{transform:none}
+  .js .rank .fill{width:var(--w);transition:none}
+}
+</style>
+</head>
+<body>
+<div id="bar"></div>
+<nav id="nav"><div class="wrap">
+  <a class="brand" href="#top"><img src="icon.png" alt="">Ras les boules</a>
+  <div class="links"><a href="#features">Fonctionnalités</a><a href="#ranking">Classement</a><a href="#how">Comment ça marche</a><a class="dl" href="#download">Télécharger</a></div>
+</div></nav>
+
+<header class="hero" id="top">
+  <div class="ball"></div>
+  <div class="wrap grid">
+    <div>
+      <div class="eyebrow rv" style="color:var(--t-100)">Tennis de table · Appli de bureau</div>
+      <h1 class="rv" style="--i:1">Vos tournois, <em>sans prise de tête.</em></h1>
+      <p class="lead rv" style="--i:2">Inscriptions, appariements, scores en direct, handicap et classement. Ras les boules organise tout, pour que vous gardiez la raquette en main.</p>
+      <div class="cta rv" style="--i:3">
+        <a class="btn btn-main" href="#download">⬇ Télécharger</a>
+        <a class="btn btn-ghost" href="#features">Découvrir</a>
+      </div>
+      <div class="meta rv" style="--i:4">macOS · Windows · Linux — gratuit, mises à jour automatiques</div>
+    </div>
+    <div class="logo rv r"><img src="icon.png" alt="Logo Ras les boules"></div>
+  </div>
+  <div class="wrap">
+    <div class="shot" id="shot">
+      <div class="app">
+        <div class="side"><b><img src="icon.png" alt="">Ras les boules</b><span class="on">🏆 Tournois</span><span>👥 Joueurs</span><span>🏓 Matchs</span><span>⚙ Paramètres</span></div>
+        <div class="main">
+          <div class="stats">
+            <div class="stat"><small>Joueurs inscrits</small><strong>32</strong></div>
+            <div class="stat"><small>Matchs joués</small><strong>47</strong></div>
+            <div class="stat"><small>Tour en cours</small><strong>4 / 5</strong></div>
+          </div>
+          <table>
+            <tr><th>Match</th><th>Score</th><th>Statut</th></tr>
+            <tr><td><b>Léa M.</b> vs Hugo B.</td><td>2 – 1</td><td><span class="pill live"><span class="dot"></span>En cours</span></td></tr>
+            <tr><td><b>Sam D.</b> vs Inès R.</td><td>3 – 0</td><td><span class="pill done">Terminé</span></td></tr>
+            <tr><td><b>Tom P.</b> vs Clara V.</td><td>—</td><td><span class="pill wait">À lancer</span></td></tr>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<section id="features"><div class="wrap">
+  <div class="head rv"><div class="eyebrow">Fonctionnalités</div><h2>Tout ce qu'il faut pour une soirée parfaite.</h2><p>Pensée par des joueurs, pour ceux qui organisent. Rien de superflu, tout ce qui compte.</p></div>
+  <div class="cards">
+    <div class="card rv" style="--i:0"><div class="ic">🏆</div><h3>Création express</h3><p>Un assistant en quelques clics : nom, mode de jeu, nombre de tours. Votre tournoi est prêt avant le premier échange.</p></div>
+    <div class="card rv" style="--i:1"><div class="ic">🎯</div><h3>Appariements auto</h3><p>Chaque tour est généré à partir du classement, sans doublons de rencontres, avec gestion des exemptions.</p></div>
+    <div class="card rv" style="--i:2"><div class="ic">⚡</div><h3>Scores en direct</h3><p>Lancez un match, saisissez les sets, validez. Le tableau se met à jour instantanément.</p></div>
+    <div class="card rv" style="--i:3"><div class="ic">⚖️</div><h3>Handicap intégré</h3><p>Équilibrez les niveaux : points d'avance calculés selon l'écart de classement, avec plafond réglable.</p></div>
+    <div class="card rv" style="--i:4"><div class="ic">📜</div><h3>Historique complet</h3><p>Retrouvez chaque match, filtrez par joueur, tour ou statut, du plus récent au plus ancien.</p></div>
+    <div class="card rv" style="--i:5"><div class="ic">💾</div><h3>Local et rapide</h3><p>Vos données restent sur votre machine, dans une base SQLite. Pas de compte, pas de connexion requise.</p></div>
+  </div>
+</div></section>
+
+<section class="band" id="ranking"><div class="wrap split">
+  <div class="rv l">
+    <div class="eyebrow">Classement</div>
+    <h2>Le podium se dessine en temps réel.</h2>
+    <ul class="bullets">
+      <li>Classement recalculé après chaque match terminé.</li>
+      <li>Départage clair, lisible d'un coup d'œil sur grand écran.</li>
+      <li>Export des résultats pour partager la soirée.</li>
+    </ul>
+  </div>
+  <div class="panel rv r" id="rankPanel">
+    <div class="rank">
+      <div class="row"><i>1</i><span>Léa M.</span><div class="track"><div class="fill" style="--w:96%"></div></div><span class="n" data-to="9">0</span></div>
+      <div class="row"><i>2</i><span>Sam D.</span><div class="track"><div class="fill" style="--w:80%"></div></div><span class="n" data-to="8">0</span></div>
+      <div class="row"><i>3</i><span>Hugo B.</span><div class="track"><div class="fill" style="--w:62%"></div></div><span class="n" data-to="6">0</span></div>
+      <div class="row"><i>4</i><span>Inès R.</span><div class="track"><div class="fill" style="--w:45%"></div></div><span class="n" data-to="4">0</span></div>
+      <div class="row"><i>5</i><span>Tom P.</span><div class="track"><div class="fill" style="--w:28%"></div></div><span class="n" data-to="3">0</span></div>
+    </div>
+  </div>
+</div></section>
+
+<section><div class="wrap split">
+  <div class="panel rv l">
+    <div class="hc">
+      <div class="p">Léa<small>1 200 pts</small></div>
+      <div class="vs">vs</div>
+      <div class="p">Tom<small>900 pts</small></div>
+    </div>
+    <div style="text-align:center;margin-top:22px;color:var(--ink-2)">Avantage accordé à Tom</div>
+    <div class="big" style="text-align:center">+<span class="n" data-to="6">0</span></div>
+  </div>
+  <div class="rv r">
+    <div class="eyebrow">Handicap</div>
+    <h2>Des matchs serrés, quel que soit le niveau.</h2>
+    <ul class="bullets">
+      <li>Tranche de points, avance par tranche et plafond : tout se règle.</li>
+      <li>Activable tournoi par tournoi.</li>
+      <li>Les débutants jouent pour gagner, pas pour subir.</li>
+    </ul>
+  </div>
+</div></section>
+
+<section class="band" id="how"><div class="wrap">
+  <div class="head rv"><div class="eyebrow">Comment ça marche</div><h2>Trois étapes. C'est tout.</h2></div>
+  <div class="steps">
+    <div class="step rv" style="--i:0"><h3>Créez</h3><p>Nommez votre tournoi, choisissez le format et inscrivez vos joueurs.</p></div>
+    <div class="step rv" style="--i:1"><h3>Jouez</h3><p>Lancez les matchs, saisissez les scores, enchaînez les tours automatiquement.</p></div>
+    <div class="step rv" style="--i:2"><h3>Célébrez</h3><p>Clôturez, exportez le classement final et remettez les médailles.</p></div>
+  </div>
+</div></section>
+
+<section id="download"><div class="wrap">
+  <div class="dl-box rv">
+    <img src="icon.png" alt="">
+    <h2>Prêt pour le premier service ?</h2>
+    <p>Téléchargez la dernière version. L'appli se met à jour toute seule dès qu'une nouvelle release sort.</p>
+    <div class="os">
+      <a class="btn btn-main" href="https://github.com/mathurin59000/ras-les-boules/releases/latest">⬇ Dernière version</a>
+      <a class="btn btn-ghost" href="https://github.com/mathurin59000/ras-les-boules">Code source</a>
+    </div>
+    <p style="margin:22px 0 0;font-size:14px">macOS (.dmg) · Windows (.exe) · Linux (.AppImage)</p>
+  </div>
+</div></section>
+
+<footer>© Ras les boules — fait avec ❤ pour le tennis de table</footer>
+
+<script>
+document.documentElement.classList.add('js');
+const $=s=>document.querySelector(s),root=document.documentElement,nav=$('#nav'),bar=$('#bar'),shot=$('#shot');
+function onScroll(){
+  const y=scrollY,h=document.body.scrollHeight-innerHeight;
+  root.style.setProperty('--sy',y);
+  bar.style.width=(y/h*100)+'%';
+  nav.classList.toggle('solid',y>40);
+  const r=shot.getBoundingClientRect();
+  root.style.setProperty('--tilt',Math.min(1,Math.max(0,(innerHeight-r.top)/innerHeight*1.6)));
+}
+addEventListener('scroll',onScroll,{passive:true});onScroll();
+
+function count(el){
+  const to=+el.dataset.to;let t0;
+  const step=t=>{t0??=t;const p=Math.min(1,(t-t0)/1200);el.textContent=Math.round(to*(1-Math.pow(1-p,3)));if(p<1)requestAnimationFrame(step)};
+  requestAnimationFrame(step);
+}
+const io=new IntersectionObserver(es=>es.forEach(e=>{
+  if(!e.isIntersecting)return;
+  e.target.classList.add('in');
+  e.target.querySelectorAll('.n').forEach(count);
+  if(e.target.classList.contains('n'))count(e.target);
+  io.unobserve(e.target);
+}),{threshold:.2});
+document.querySelectorAll('.rv').forEach(el=>io.observe(el));
+if(matchMedia('(prefers-reduced-motion:reduce)').matches)document.querySelectorAll('.n').forEach(n=>n.textContent=n.dataset.to);
+</script>
+</body>
+</html>

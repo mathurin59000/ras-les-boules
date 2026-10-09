@@ -190,6 +190,7 @@ export function TournamentDetailPage() {
       <div className="mt-5 animate-card-in" style={appearAfter(420)}>
         {currentTab === 'overview' && (
           <OverviewTab
+            tournamentId={tournament.id}
             settings={settings}
             started={started || tournament.status === 'in_progress'}
             onStartMatch={setStartingMatch}
@@ -198,7 +199,7 @@ export function TournamentDetailPage() {
         )}
         {currentTab === 'players' && <PlayersTab tournament={tournament} />}
         {currentTab === 'ranking' && <RankingTab started={started} />}
-        {currentTab === 'history' && <HistoryTab started={started} />}
+        {currentTab === 'history' && <HistoryTab started={started} onEditResult={setResultMatch} />}
         {currentTab === 'settings' && (
           <SettingsTab key={tournament.id} tournament={tournament} settings={settings} />
         )}

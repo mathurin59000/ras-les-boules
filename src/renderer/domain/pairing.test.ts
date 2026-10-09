@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { autoPair, computeWaiting } from './pairing'
+import { autoPair, computeWaiting, limitsFor } from './pairing'
+import { DEFAULT_SETTINGS } from './defaults'
 import { seedFirstRound } from './seeding'
 import { computeRanking } from './ranking'
 import { formatScore } from './scoring'
@@ -154,5 +155,46 @@ describe('end condition limits', () => {
   it('caps the total number of matches', () => {
     expect(autoPair(base, 'x', { maxTotalMatches: 3 })).toHaveLength(1)
     expect(autoPair(base, 'x', { maxTotalMatches: 2 })).toHaveLength(0)
+  })
+})
+
+describe('players who left the loop', () => {
+  const roster = [
+    { id: '1', name: 'A', points: 1000, status: 'active' },
+    { id: '2', name: 'B', points: 1000, status: 'active', inactive: true },
+    { id: '3', name: 'C', points: 1000, status: 'forfeit' },
+    { id: '4', name: 'D', points: 1000, status: 'active' },
+    { id: '5', name: 'E', points: 1000, status: 'active' },
+  ]
+  // F is not on the roster any more (removed)
+  const limits = limitsFor(DEFAULT_SETTINGS, roster)
+  const st = (live: Match[] = []) => ({
+    pending: [],
+    live,
+    finished: [],
+    waitingBase: ['A', 'B', 'C', 'D', 'E', 'F'].map((name) => ({
+      name,
+      rating: 1000,
+      nextRound: 2,
+    })),
+  })
+
+  it('keeps inactive, forfeit and removed players out of waiting', () => {
+    expect(
+      computeWaiting(st(), limits)
+        .map((w) => w.name)
+        .sort(),
+    ).toEqual(['A', 'D', 'E'])
+  })
+  it('never books them in a new match', () => {
+    const names = autoPair(st(), 'x', limits).flatMap((m) => [m.p1.name, m.p2.name])
+    expect(names.every((n) => ['A', 'D', 'E'].includes(n))).toBe(true)
+  })
+  it('lets them finish a live match without re-entering the loop', () => {
+    // B plays C now; once finished neither is waiting nor paired
+    const done: Match = { ...match('f', 1, 'B', 'C'), score: '30-10' }
+    const after = { ...st(), finished: [done] }
+    expect(computeWaiting(after, limits).map((w) => w.name)).not.toContain('B')
+    expect(computeWaiting(after, limits).map((w) => w.name)).not.toContain('C')
   })
 })

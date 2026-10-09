@@ -19,6 +19,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
+import { cn } from '@/lib/utils'
 import { useAppStore } from '@/stores/app-store'
 
 type MatchStatus = 'pending' | 'live' | 'done'
@@ -33,6 +34,7 @@ const MATCH_STATUS: Record<
 }
 
 interface Row {
+  match: Match
   time: string
   round: number
   p1: string
@@ -43,6 +45,7 @@ interface Row {
 }
 
 const toRow = (m: Match, status: MatchStatus): Row => ({
+  match: m,
   time: m.time ?? '—',
   round: m.round,
   p1: m.p1.name,
@@ -52,7 +55,13 @@ const toRow = (m: Match, status: MatchStatus): Row => ({
   bye: !!m.bye,
 })
 
-export function HistoryTab({ started }: { started: boolean }) {
+interface Props {
+  started: boolean
+  /** Opens the score dialog for a live match (enter it) or a finished one (correct it). */
+  onEditResult: (m: Match) => void
+}
+
+export function HistoryTab({ started, onEditResult }: Props) {
   const pending = useAppStore((s) => s.pending)
   const live = useAppStore((s) => s.live)
   const finished = useAppStore((s) => s.finished)
@@ -160,8 +169,19 @@ export function HistoryTab({ started }: { started: boolean }) {
             <TableBody>
               {rows.map((r, i) => {
                 const st = MATCH_STATUS[r.status]
+                const editable = r.status !== 'pending' && !r.bye
                 return (
-                  <TableRow key={i}>
+                  <TableRow
+                    key={i}
+                    className={cn(editable && 'cursor-pointer')}
+                    tabIndex={editable ? 0 : undefined}
+                    onClick={editable ? () => onEditResult(r.match) : undefined}
+                    onKeyDown={
+                      editable
+                        ? (e) => e.key === 'Enter' && (e.preventDefault(), onEditResult(r.match))
+                        : undefined
+                    }
+                  >
                     <TableCell className="text-muted-foreground tabular-nums">{r.time}</TableCell>
                     <TableCell className="text-muted-foreground">Tour {r.round}</TableCell>
                     <TableCell className="font-semibold">

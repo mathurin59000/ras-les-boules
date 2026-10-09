@@ -109,7 +109,7 @@ export const createTournamentsSlice =
 
       startTournament: (id) => {
         const s = get()
-        const roster = s.rosters[id] ?? []
+        const roster = (s.rosters[id] ?? []).filter((p) => !p.inactive && p.status !== 'forfeit')
         if (roster.length < 2) return
         const pool = roster.map((p) => ({ name: p.name, rating: p.points || 1000 }))
         const { matches, byes } = seedFirstRound(pool, `r1-${Date.now()}`)

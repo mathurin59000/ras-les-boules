@@ -10,7 +10,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { computeWaiting, limitsFrom } from '@/domain/pairing'
+import { computeWaiting, limitsFor } from '@/domain/pairing'
 import { computeRanking } from '@/domain/ranking'
 import { useAppStore } from '@/stores/app-store'
 import { MatchCard } from '../match-card'
@@ -62,21 +62,31 @@ function MatchGrid({
 }
 
 interface Props {
+  tournamentId: string
   settings: TournamentSettings
   started: boolean
   onStartMatch: (m: Match) => void
   onEnterResult: (m: Match) => void
 }
 
-export function OverviewTab({ settings, started, onStartMatch, onEnterResult }: Props) {
+export function OverviewTab({
+  tournamentId,
+  settings,
+  started,
+  onStartMatch,
+  onEnterResult,
+}: Props) {
   const pending = useAppStore((s) => s.pending)
   const live = useAppStore((s) => s.live)
   const finished = useAppStore((s) => s.finished)
   const waitingBase = useAppStore((s) => s.waitingBase)
+  const roster = useAppStore((s) => s.rosters[tournamentId])
   const waiting = useMemo(
     () =>
-      started ? computeWaiting({ pending, live, finished, waitingBase }, limitsFrom(settings)) : [],
-    [started, pending, live, finished, waitingBase, settings],
+      started
+        ? computeWaiting({ pending, live, finished, waitingBase }, limitsFor(settings, roster))
+        : [],
+    [started, pending, live, finished, waitingBase, settings, roster],
   )
 
   const records = useMemo(

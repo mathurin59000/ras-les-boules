@@ -1,4 +1,4 @@
-import type { Match, Matches, TournamentSettings, WaitingBase } from '@shared/types'
+import type { Match, Matches, Player, TournamentSettings, WaitingBase } from '@shared/types'
 import { createBye, isBye, realPlayers } from './bye'
 import { computeRanking } from './ranking'
 
@@ -10,6 +10,8 @@ export interface PairingState extends Matches {
 export interface PairingLimits {
   maxMatchesPerPlayer?: number
   maxTotalMatches?: number
+  /** Players who must not be given a new match (inactive, forfeit or removed): they finish what they play. */
+  isOut?: (name: string) => boolean
 }
 
 const positive = (n: number) => (Number.isFinite(n) && n > 0 ? n : undefined)
@@ -28,6 +30,19 @@ export function limitsFrom(settings: TournamentSettings): PairingLimits {
   }
   if (settings.endConditionType === 'total_matches') return { maxTotalMatches: v }
   return {}
+}
+
+/** Limits plus the roster rule: inactive, forfeit and removed players leave the pairing loop. */
+export function limitsFor(settings: TournamentSettings, roster?: Player[]): PairingLimits {
+  if (!roster?.length) return limitsFrom(settings) // no roster known: nobody can be told out
+  const byName = new Map(roster.map((p) => [p.name, p]))
+  return {
+    ...limitsFrom(settings),
+    isOut: (name) => {
+      const p = byName.get(name)
+      return !p || !!p.inactive || p.status === 'forfeit'
+    },
+  }
 }
 
 /** True when the end condition caps the tournament (anything but a manual end). */
@@ -98,7 +113,7 @@ function playerStates(st: PairingState, limits: PairingLimits): PlayerState[] {
   const count = countMatches(st)
   const max = limits.maxMatchesPerPlayer
   states.forEach((p) => {
-    p.capped = !!max && (count.get(p.name) ?? 0) >= max
+    p.capped = (!!max && (count.get(p.name) ?? 0) >= max) || !!limits.isOut?.(p.name)
   })
   return [...states.values()]
 }

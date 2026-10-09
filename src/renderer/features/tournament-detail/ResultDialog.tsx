@@ -44,20 +44,25 @@ export function ResultDialog({ match, tournamentId, settings, onClose }: Props) 
 
 function ResultForm({ match, tournamentId, settings, onClose }: Props & { match: Match }) {
   const finishMatch = useAppStore((s) => s.finishMatch)
-  const [winner, setWinner] = useState<Side | null>(null)
-  const [loserPoints, setLoserPoints] = useState(0)
+  const editResult = useAppStore((s) => s.editResult)
+  // a finished match carries its score: the dialog then corrects it
+  const [s1, s2] = (match.score ?? '').split('-').map(Number)
+  const editing = Number.isFinite(s1) && Number.isFinite(s2)
+  const [winner, setWinner] = useState<Side | null>(editing ? (s1 > s2 ? 'p1' : 'p2') : null)
+  const [loserPoints, setLoserPoints] = useState(editing ? Math.min(s1, s2) : 0)
   const target = settings.pointsPerSet || 30
 
   const confirm = () => {
     if (!winner) return
-    finishMatch(match.id, winner, loserPoints, settings, tournamentId)
+    if (editing) editResult(match.id, winner, loserPoints, settings)
+    else finishMatch(match.id, winner, loserPoints, settings, tournamentId)
     onClose()
   }
 
   return (
     <>
       <DialogHeader>
-        <DialogTitle>Résultat du match</DialogTitle>
+        <DialogTitle>{editing ? 'Modifier le résultat' : 'Résultat du match'}</DialogTitle>
         <DialogDescription>
           Tour {match.round} · {match.p1.name} vs {match.p2.name}
         </DialogDescription>
